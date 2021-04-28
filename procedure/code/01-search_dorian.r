@@ -44,6 +44,17 @@ dorian <- search_tweets("dorian OR hurricane OR sharpiegate", n=200000, include_
 #the query searches for all verified or unverified tweets, so essentially everything
 november <- search_tweets("-filter:verified OR filter:verified", n=200000, include_rts=FALSE, token=twitter_token, geocode="32,-78,1000mi", retryonratelimit=TRUE)
 
+
+############# LOAD THESE RESULTS - GEOG323 STUDENTS ONLY ############# 
+
+# Please download the file from here: https://github.com/GIS4DEV/literature/raw/master/dorian/dorian.RData
+# into the data\derived\private folder
+# then run the following line of code to load the data into your environment
+
+load(here("data","derived","private","dorian.RData"))
+
+# In the following code, you can practice running the queries on dorian3
+
 ############# FIND ONLY PRECISE GEOGRAPHIES ############# 
 
 #reference for lat_lng function: https://rtweet.info/reference/lat_lng.html
@@ -70,10 +81,4 @@ november <- subset(november, place_type == 'city'| place_type == 'neighborhood'|
 dorian <- lat_lng(dorian,coords=c("bbox_coords"))
 november <- lat_lng(november,coords=c("bbox_coords"))
 
-############# LOAD THESE RESULTS - GEOG323 STUDENTS ONLY ############# 
 
-# Please download the file from here: https://github.com/GIS4DEV/literature/raw/master/dorian/dorian.RData
-# into the data\derived\private folder
-# then run the following line of code to load the data into your environment
-
-load(here("data","derived","private","dorian.RData"))

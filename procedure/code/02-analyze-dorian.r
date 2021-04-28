@@ -26,7 +26,7 @@ library(here)
 
 ############# TEMPORAL ANALYSIS ############# 
 
-#this is here as an example. Query new twitter data if you want to try...
+#this is here as an example. change to the dorian3 data you processed in the previous script to try...
 
 #create temporal data frame & graph it
 
@@ -35,7 +35,7 @@ ts_plot(dorian, by="hours")
 
 ############# NETWORK ANALYSIS ############# 
 
-#this is here as an example. Query new twitter data if you want to try...
+#this is here as an example. change to the dorian3 data you processed in the previous script to try...
 
 #create network data frame. Other options for 'edges' in the network include mention, retweet, and reply
 dorianNetwork <- network_graph(dorian, c("quote"))
