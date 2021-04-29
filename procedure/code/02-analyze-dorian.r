@@ -30,7 +30,7 @@ library(here)
 
 #create temporal data frame & graph it
 
-dorian <- ts_data(dorian, by="hours")
+dorianByHr <- ts_data(dorian, by="hours")
 ts_plot(dorian, by="hours")
 
 ############# NETWORK ANALYSIS ############# 
@@ -143,7 +143,7 @@ dbWriteTable(con,'dorian',doriansql, overwrite=TRUE)
 # SQL to add geometry column of type point and crs NAD 1983: 
 # SELECT AddGeometryColumn ('schemaname','dorian','geom',4269,'POINT',2, false);
 # SQL to calculate geometry:
-# UPDATE dorian set geom = st_transform(st_makepoint(lng,lat),4326,4269);
+# UPDATE dorian set geom = st_transform(st_setsrid(st_makepoint(lng,lat),4326),4269);
 
 #make all lower-case names for counties, because PostGreSQL is not into capitalization
 
