@@ -101,7 +101,7 @@ dorianWordPairs %>%
 
 #first, sign up for a Census API here: https://api.census.gov/data/key_signup.html
 #replace the key text 'yourkey' with your own key!
-counties <- get_estimates("county",product="population",output="wide",geometry=TRUE,keep_geo_vars=TRUE, key="1fb2d48d1ae3f73a19d620f258ec9f823ad09b25")
+counties <- get_estimates("county",product="population",output="wide",geometry=TRUE,keep_geo_vars=TRUE, key="yourkey")
 
 #select only the states you want, with FIPS state codes in quotes in the c() list
 #look up fips codes here: https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code 
@@ -144,6 +144,8 @@ dbWriteTable(con,'dorian',doriansql, overwrite=TRUE)
 # SELECT AddGeometryColumn ('schemaname','dorian','geom',4269,'POINT',2, false);
 # SQL to calculate geometry:
 # UPDATE dorian set geom = st_transform(st_setsrid(st_makepoint(lng,lat),4326),4269);
+# SQL to register the geometry column for counties, replacing schemaname with your schema's name
+# SELECT populate_geometry_columns('schemaname.dorian'::regclass)
 
 #make all lower-case names for counties, because PostGreSQL is not into capitalization
 
