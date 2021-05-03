@@ -43,18 +43,21 @@ twitter_token = create_token(
 )
 
 # get tweets for hurricane Dorian, searched on September 11, 2019
+# this code will no longer work! It is here for reference.
 dorian = search_tweets("dorian OR hurricane OR sharpiegate",
                        n=200000, include_rts=FALSE,
                        token=twitter_token, 
                        geocode="32,-78,1000mi",
                        retryonratelimit=TRUE) 
 
+# write results of the original twitter search
 write.table(dorian_raw$status_id,
             here("data","raw","public","dorianids.txt"), 
             append=FALSE, quote=FALSE, row.names = FALSE, col.names = FALSE)
 
 # get tweets without any text filter for the same geographic region in November, 
 # searched on November 19, 2019
+# this code will no longer work! It is here for reference.
 # the query searches for all verified or unverified tweets, i.e. everything
 november = search_tweets("-filter:verified OR filter:verified", 
                          n=200000, include_rts=FALSE, 
@@ -83,6 +86,9 @@ dorian_raw = rehydratoR(twitter_token$app$key, twitter_token$app$secret,
                 base_path = NULL, group_start = 1)
 
 # alternatively, geog 323 students may load original dorian tweets
+# download dorian_raw.RDS from 
+# https://github.com/GIS4DEV/geog323data/raw/main/dorian/dorian_raw.RDS
+# and save to the data/raw/private folder
 dorian_raw = readRDS(here("data","raw","private","dorian_raw.RDS"))
 
 # rehydrate november tweets
@@ -92,6 +98,9 @@ november = rehydratoR(twitter_token$app$key, twitter_token$app$secret,
                         base_path = NULL, group_start = 1)
 
 # alternatively, geog 323 students may load 13228 cleaned november tweets
+# download november.RDS from 
+# https://github.com/GIS4DEV/geog323data/raw/main/dorian/november.RDS
+# and save to the data/derived/private folder
 november = readRDS(here("data","derived","private","november.RDS"))
 
 ############# FILTER DORIAN FOR CREATING PRECISE GEOMETRIES ############# 
