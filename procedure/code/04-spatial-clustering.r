@@ -18,6 +18,10 @@ library(ggplot2)
 # This section may not be necessary if you have already spatially joined
 # and calculated normalized tweet rates in PostGIS
 
+# load dorian and november data if not already loaded
+dorian = readRDS(here("data","derived","private","dorian.RDS"))
+november = readRDS(here("data","derived","private","november.RDS"))
+
 dorian_sf = dorian %>%
   st_as_sf(coords = c("lng","lat"), crs=4326) %>%  # make point geometries
   st_transform(4269) %>%  # transform to NAD 1983
@@ -66,34 +70,30 @@ counties = readRDS(here("data","derived","public","counties_tweet_counts.RDS"))
 # and edited by Joseph Holler (2021)
 # See https://caseylilley.github.io/finalproj.html
 
-#Converting and sf object to a spatial object
-counties_sp = counties %>% 
-  st_centroid() %>%   # find centroid of each county
-  as("Spatial")       # convert to the sp spatial data type
-
-#Create threshold distance weight matrix
-thresdist = counties_sp %>% 
-  coordinates() %>%    # convert to simple x,y coordinates
+thresdist = counties %>% 
+  st_centroid() %>%     # convert polygons to centroid points
+  st_coordinates() %>%  # convert to simple x,y coordinates to play with stdep
   dnearneigh(0, 110, longlat = TRUE) %>%  # use geodesic distance of 110km
   include.self()       # include a county in its own neighborhood (for G*)
-thresdist #view the outcome and number of neighbors 
 
-#View the neighbor connections - we can see we have quite a lot!
-#plot(counties_sp, border = 'lightgrey')
-#plot(selfdist, coords, add=TRUE, col = 'red')
+# three optional steps to view results of nearest neighbors analysis
+thresdist # view statistical summary of the nearest neighbors 
+plot(counties_sp, border = 'lightgrey')  # plot counties background
+plot(selfdist, coords, add=TRUE, col = 'red') # plot nearest neighbor ties
 
 #Create weight matrix from the neighbor objects
-dwm <- nb2listw(thresdist, zero.policy = T)
+dwm = nb2listw(thresdist, zero.policy = T)
 
 ######## Local G* Hotspot Analysis ######## 
 #Get Ord G* statistic for hot and cold spots
 counties$locG = as.vector(localG(counties$dorrate, listw = dwm, 
                                  zero.policy = TRUE))
 
-summary(counties$locG)  # check summary statistics of the local G score
+# optional step to check summary statistics of the local G score
+summary(counties$locG)
 
-# 2.58 is 0.01 conf, and 1.95 is 0.05, two tailed
 # classify G scores by significance values typical of Z-scores
+# where 2.58 is >0.01 confidence, and 1.95 is >0.05 confidence, two tailed
 siglevel = c(1,1.95)
 counties = counties %>% 
   mutate(sig = cut(locG, c(min(counties$locG),
