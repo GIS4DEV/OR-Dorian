@@ -93,8 +93,12 @@ counties$locG = as.vector(localG(counties$dorrate, listw = dwm,
 summary(counties$locG)
 
 # classify G scores by significance values typical of Z-scores
-# where 2.58 is >0.01 confidence, and 1.95 is >0.05 confidence, two tailed
-siglevel = c(1,1.95)
+# where 1.15 is at the 0.125 confidence level,
+# and 1.95 is at the 0.05 confidence level for two tailed z-scores
+# based on Getis and Ord (1995) Doi: 10.1111/j.1538-4632.1992.tb00261.x
+# alternatively, Bonferroni correction could be applied to adjust these
+# significance thresholds
+siglevel = c(1.15,1.95)
 counties = counties %>% 
   mutate(sig = cut(locG, c(min(counties$locG),
                            siglevel[2]*-1,
