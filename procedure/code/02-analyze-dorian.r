@@ -30,17 +30,17 @@ library(here)
 
 #create temporal data frame & graph it
 
-dorian <- ts_data(dorian, by="hours")
-ts_plot(dorian, by="hours")
+dorianByHour <- ts_data(dorian3, by="hours")
+ts_plot(dorian3, by="hours")
 
 ############# NETWORK ANALYSIS ############# 
 
 #this is here as an example. change to the dorian3 data you processed in the previous script to try...
 
 #create network data frame. Other options for 'edges' in the network include mention, retweet, and reply
-dorianNetwork <- network_graph(dorian, c("quote"))
+dorianNetwork <- network_graph(dorian3, c("quote"))
 
-plot.igraph(winterTweetNetwork)
+plot.igraph(dorianNetwork)
 #Please, this is incredibly ugly... if you finish early return to this function and see if we can modify its parameters to improve aesthetics
 
 ############# TEXT / CONTEXTUAL ANALYSIS ############# 
@@ -127,7 +127,7 @@ ggplot() +
 #Connectign to Postgres
 #Create a con database connection with the dbConnect function.
 #Change the user and password to your own!
-con <- dbConnect(RPostgres::Postgres(), dbname='dsm', host='artemis', user='user', password='password') 
+con <- dbConnect(RPostgres::Postgres(), dbname='dsm', host='artemis', user='brooke', password='Abigail37!!') 
 
 #list the database tables, to check if the database is working
 dbListTables(con) 
