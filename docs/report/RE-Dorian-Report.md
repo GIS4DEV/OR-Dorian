@@ -5,9 +5,11 @@ title: RE- Spatial-temporal and content analysis of Twitter Data
 
 
 **Replication of**
-# Spatial-temporal and content analysis of Twitter Data
+# Spatial, temporal and content analysis of Twitter data
 
-Original study *by* Wang, Z., X. Ye, and M. H. Tsou. 2016. Spatial, temporal, and content analysis of Twitter for wildfire hazards. *Natural Hazards* 83 (1):523–540. DOI:[10.1007/s11069-016-2329-6](https://doi.org/10.1007/s11069-016-2329-6), and replicated for the case of Hurricane Dorian by Joseph Holler (2021, work in progress).
+Original study *by* Wang, Z., X. Ye, and M. H. Tsou. 2016. Spatial, temporal, and content analysis of Twitter for wildfire hazards. *Natural Hazards* 83 (1):523–540. DOI:[10.1007/s11069-016-2329-6](https://doi.org/10.1007/s11069-016-2329-6). 
+and
+First replication study by Holler, J. 2021 (in preparation). Hurricane Dorian vs Sharpie Pen: an empirical test of social amplification of risk on social media.
 
 Replication Author:
 Your Name
@@ -19,24 +21,36 @@ Revised: `DD Month YYYY`
 
 ## Abstract 
 
-The original study is a ...  The replication implemented similar spatial, temporal, network, and content analysis techniques to Tweets during Hurricane Dorian in the 2019 Atlantic Hurricane season, testing a hypothesis that false narratives of hurricane risk promulgated at the highest levels of the United States government would significantly distort the geographic distribution of Twitter activity related to the hurricane and its impacts. 
-This replication of the method studies ... asking the research question ... 
+Why study the spatial distribution of Twitter data?
+
+Wang et al (2016) analyzed Twitter data for wildfires in California, finding that the social media data ...
+
+Holler (2021) is studying Twitter data for Hurricane Dorian on the Atlantic coast, finding that in spite of tending news and social media content regarding a false narrative of risk, original Tweets still clustered significantly along the real hurricane track, and only along the hurricane track.
+
+Reproducing and replicating spatial research of .....  continues to be relevant because .... 
+
+In his replication study, I will ... 
+
+
 
 ## Original Study Information
 
-The original study by Wang et al (2016) used the Twitter Search API with ... parameters and normalized the data using ... methods with ... data. The study found that ...
+**summarize Wang et al (2016) similar to the Holler (2021) summary below**
 
-The replication study by Holler (2021) used the Twitter Search API with ... parameters and normalized the data using ... methods with ... data.  The study found that ...
+Holler (2021) losely replicated the methods of Wang et al (2016) for the case of Hurricane Dorian's landfall on the U.S. mainland during the 2019 Atlantic Hurricane season. Data was based on Twitter Search API queries for .... 
+
+Holler modified Wang et al's methods by not searching for retweets for network analysis, focusing instead on original Tweet content with keywords hurricane, Dorian, or sharpiegate (a trending hashtag referring to the storm). Holler modified the methodology for normalizing tweet data by creating a normalized Tweet difference index and extended teh methodology to test for spatial cluserting with the local Getis-Ord statistic. The study tested a hypothesis that false narratives of hurricane risk promulgated at the highest levels of the United States government would significantly distort the geographic distribution of Twitter activity related to the hurricane and its impacts, finding that original Twitter data still clustered only in the affected areas of the Atlantic coast in spite of false narratives about risk of a westward track through Alabama.
 
 Wang et al (2016) conducted their study using the `tm` and `igraph` packages in `R 3.1.2`. Is it known what GIS software was used for spatial analysis?
 The replication study by Holler (2021) used R, including the rtweet, rehydratoR, igraph, sf, and spdep packages for analysis.
 
 ## Materials and Procedure
 
-Outline the data used in the replication study, including:
+Outline the data to be used in your replication study, including:
 
 - twitter search parameters
 - any data used to normalize the tweets
+- methods for analysis / synthesis
 
 ## Replication Results
 
@@ -53,7 +67,7 @@ Summarize changes and uncertainties between
 
 ## Discussion
 
-Provide a summary and interpretation of your key findings in relation to your research question. Mention if findings confirm or contradict patterns observed by Wang et al (2016) or by Holler (2021).
+Provide a summary and interpretation of your key findings in relation to your research question. Mention if findings confirm or contradict patterns observed by Wang et al (2016) or by Holler (2
 
 ## Conclusion
 
