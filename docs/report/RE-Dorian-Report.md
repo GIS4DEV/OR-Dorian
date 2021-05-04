@@ -49,6 +49,7 @@ The replication study by Holler (2021) used R, including the rtweet, rehydratoR,
 Outline the data to be used in your replication study, including:
 
 - twitter search parameters
+- attach / link to files containing status_id's for the search results
 - any data used to normalize the tweets
 - methods for analysis / synthesis
 
