@@ -34,3 +34,5 @@ november <- subset(november, place_type == 'city'| place_type == 'neighborhood'|
 dorian <- lat_lng(dorian,coords=c("bbox_coords"))
 november <- lat_lng(november,coords=c("bbox_coords"))
 ```
+
+See the code in `01-search_dorain.r` for details.

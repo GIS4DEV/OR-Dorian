@@ -1,2 +1,9 @@
 path,name,format,sources,metadata
-raw\private\,dorian.Rdata,R data,Twitter search via rtweet,see metadata\readme.md
+raw\private\,dorian_raw.RDS,R data,"tweet data for Twitter search via rtweet (all results, unfiltered. See 01-search_dorian.r for code)",see metadata\readme.md
+raw\public,dorianids.txt,csv,"status id's for Twitter search via rtweet (all results, unfiltered. See 01-search_dorian.r for code)",see metadata\readme.md
+derived\public,novemberids.txt,csv,status id's for Twitter search via rtweet and filtering for geographic data via 01-search_dorian.r,see metadata\readme.md
+derived\public,dorianids.txt,csv,status id's forTwitter search via rtweet and filtering for geographic data via 01-search_dorian.r,see metadata\readme.md
+derived\public,counties.RDS,R data,census data for counties in Eastern U.S. queried with tidycensus,
+derived\public,counties_tweet_counts.RDS,R data,"counties with counts of dorian tweets and november tweets, normalized tweet difference index, and tweets per 10 000 people",
+derived\private,dorian.RDS,R data,"tweet data for Hurricane Dorian tweets, filtered with geographic coordinates",see metadata\readme.md
+derived\private,november.RDS,R data,"tweet data for Hurricane Dorian tweets, filtered with geographic coordinates",see metadata\readme.md
