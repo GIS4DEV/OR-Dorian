@@ -112,6 +112,8 @@ rm(siglevel)
 # Map hot spots and cold spots!
 # breaks and colors from http://michaelminn.net/tutorials/r-point-analysis/
 # based on 1.96 as the 95% confidence interval for z-scores
+# if your results don't have values in each of the 5 categories, you may need
+# to change the values & labels accordingly.
 ggplot() +
   geom_sf(data=counties, aes(fill=sig), color="white", lwd=0.1)+
   scale_fill_manual(
