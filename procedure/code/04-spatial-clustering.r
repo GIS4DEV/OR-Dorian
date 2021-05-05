@@ -74,6 +74,7 @@ thresdist = counties %>%
   st_centroid() %>%     # convert polygons to centroid points
   st_coordinates() %>%  # convert to simple x,y coordinates to play with stdep
   dnearneigh(0, 110, longlat = TRUE) %>%  # use geodesic distance of 110km
+	# distance should be long enough for every feature to have >= one neighbor
   include.self()       # include a county in its own neighborhood (for G*)
 
 # three optional steps to view results of nearest neighbors analysis
