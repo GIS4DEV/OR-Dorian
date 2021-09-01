@@ -13,32 +13,40 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] geepack_1.3-2    SpatialEpi_1.2.5 sp_1.4-5         vtable_1.3.3     kableExtra_1.3.4
- [6] tmap_3.3-2       pastecs_1.3.21   s2_1.0.6         classInt_0.4-3   rdhs_0.7.3      
-[11] stars_0.5-3      sf_1.0-2         abind_1.4-5      haven_2.4.3      downloader_0.4  
-[16] forcats_0.5.1    stringr_1.4.0    purrr_0.3.4      readr_2.0.0      tidyr_1.1.3     
-[21] tibble_3.1.3     ggplot2_3.3.5    tidyverse_1.3.1  tidycensus_1.0   svDialogs_1.0.3 
-[26] rehydratoR_0.5.2 dplyr_1.0.7      here_1.0.1       rtweet_0.7.0    
+ [1] tm_0.7-8         NLP_0.2-1        spdep_1.1-8      spData_0.3.10    ggraph_2.0.5    
+ [6] igraph_1.2.6     tidytext_0.3.1   lintr_2.0.1      geepack_1.3-2    SpatialEpi_1.2.5
+[11] sp_1.4-5         vtable_1.3.3     kableExtra_1.3.4 tmap_3.3-2       pastecs_1.3.21  
+[16] s2_1.0.6         classInt_0.4-3   rdhs_0.7.3       stars_0.5-3      sf_1.0-2        
+[21] abind_1.4-5      haven_2.4.3      downloader_0.4   forcats_0.5.1    stringr_1.4.0   
+[26] purrr_0.3.4      readr_2.0.0      tidyr_1.1.3      tibble_3.1.3     ggplot2_3.3.5   
+[31] tidyverse_1.3.1  tidycensus_1.0   svDialogs_1.0.3  rehydratoR_0.5.2 dplyr_1.0.7     
+[36] here_1.0.1       rtweet_0.7.0    
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1       uuid_0.1-4         backports_1.2.1    systemfonts_1.0.2  lwgeom_0.2-7      
-  [6] splines_4.1.0      storr_1.2.5        crosstalk_1.1.1    leaflet_2.0.4.1    digest_0.6.27     
- [11] htmltools_0.5.1.1  gdata_2.18.0       fansi_0.5.0        magrittr_2.0.1     tzdb_0.1.2        
- [16] modelr_0.1.8       gmodels_2.18.1     svglite_2.0.0      askpass_1.1        colorspace_2.0-2  
- [21] rvest_1.0.1        rappdirs_0.3.3     xfun_0.25          rgdal_1.5-23       leafem_0.1.6      
- [26] crayon_1.4.1       jsonlite_1.7.2     tigris_1.4.1       glue_1.4.2         gtable_0.3.0      
- [31] webshot_0.5.2      scales_1.1.1       DBI_1.1.1          Rcpp_1.0.7         viridisLite_0.4.0 
- [36] spData_0.3.10      units_0.7-2        foreign_0.8-81     spdep_1.1-8        proxy_0.4-26      
- [41] htmlwidgets_1.5.3  httr_1.4.2         RColorBrewer_1.1-2 wk_0.5.0           ellipsis_0.3.2    
- [46] pkgconfig_2.0.3    XML_3.99-0.6       dbplyr_2.1.1       deldir_0.2-10      utf8_1.2.2        
- [51] later_1.3.0        tidyselect_1.1.1   rlang_0.4.11       tmaptools_3.1-1    munsell_0.5.0     
- [56] cellranger_1.1.0   tools_4.1.0        cli_3.0.1          generics_0.1.0     broom_0.7.9       
- [61] evaluate_0.14      yaml_2.2.1         leafsync_0.1.0     knitr_1.33         fs_1.5.0          
- [66] nlme_3.1-152       xml2_1.3.2         compiler_4.1.0     rstudioapi_0.13    curl_4.3.2        
- [71] png_0.1-7          svGUI_1.0.1        e1071_1.7-8        reprex_2.0.1       stringi_1.7.3     
- [76] lattice_0.20-44    Matrix_1.3-3       vctrs_0.3.8        pillar_1.6.2       LearnBayes_2.15.1 
- [81] lifecycle_1.0.0    maptools_1.1-1     raster_3.4-13      httpuv_1.6.2       R6_2.5.0          
- [86] promises_1.2.0.1   KernSmooth_2.23-20 codetools_0.2-18   dichromat_2.0-0    boot_1.3-28       
- [91] MASS_7.3-54        gtools_3.9.2       assertthat_0.2.1   openssl_1.4.4      rprojroot_2.0.2   
- [96] withr_2.4.2        expm_0.999-6       parallel_4.1.0     hms_1.1.0          grid_4.1.0        
-[101] coda_0.19-4        class_7.3-19       rmarkdown_2.10     lubridate_1.7.10   base64enc_0.1-3   
+  [6] lazyeval_0.2.2     splines_4.1.0      storr_1.2.5        crosstalk_1.1.1    leaflet_2.0.4.1   
+ [11] SnowballC_0.7.0    digest_0.6.27      htmltools_0.5.1.1  viridis_0.6.1      gdata_2.18.0      
+ [16] fansi_0.5.0        magrittr_2.0.1     remotes_2.4.0      tzdb_0.1.2         graphlayouts_0.7.1
+ [21] modelr_0.1.8       gmodels_2.18.1     R.utils_2.10.1     svglite_2.0.0      askpass_1.1       
+ [26] colorspace_2.0-2   ggrepel_0.9.1      rvest_1.0.1        rappdirs_0.3.3     xfun_0.25         
+ [31] rgdal_1.5-23       leafem_0.1.6       callr_3.7.0        crayon_1.4.1       jsonlite_1.7.2    
+ [36] tigris_1.4.1       glue_1.4.2         polyclip_1.10-0    xmlparsedata_1.0.5 gtable_0.3.0      
+ [41] webshot_0.5.2      R.cache_0.15.0     scales_1.1.1       DBI_1.1.1          Rcpp_1.0.7        
+ [46] viridisLite_0.4.0  units_0.7-2        foreign_0.8-81     proxy_0.4-26       rex_1.2.0         
+ [51] htmlwidgets_1.5.3  httr_1.4.2         RColorBrewer_1.1-2 wk_0.5.0           ellipsis_0.3.2    
+ [56] farver_2.1.0       R.methodsS3_1.8.1  pkgconfig_2.0.3    XML_3.99-0.6       dbplyr_2.1.1      
+ [61] deldir_0.2-10      utf8_1.2.2         labeling_0.4.2     later_1.3.0        tidyselect_1.1.1  
+ [66] rlang_0.4.11       tmaptools_3.1-1    munsell_0.5.0      cellranger_1.1.0   tools_4.1.0       
+ [71] cli_3.0.1          generics_0.1.0     broom_0.7.9        evaluate_0.14      yaml_2.2.1        
+ [76] rematch2_2.1.2     processx_3.5.2     leafsync_0.1.0     knitr_1.33         fs_1.5.0          
+ [81] tidygraph_1.2.0    nlme_3.1-152       slam_0.1-48        R.oo_1.24.0        xml2_1.3.2        
+ [86] tokenizers_0.2.1   compiler_4.1.0     rstudioapi_0.13    curl_4.3.2         png_0.1-7         
+ [91] svGUI_1.0.1        e1071_1.7-8        reprex_2.0.1       tweenr_1.0.2       stringi_1.7.3     
+ [96] ps_1.6.0           cyclocomp_1.1.0    desc_1.3.0         lattice_0.20-44    Matrix_1.3-3      
+[101] styler_1.5.1       vctrs_0.3.8        pillar_1.6.2       LearnBayes_2.15.1  lifecycle_1.0.0   
+[106] maptools_1.1-1     raster_3.4-13      httpuv_1.6.2       R6_2.5.0           promises_1.2.0.1  
+[111] gridExtra_2.3      KernSmooth_2.23-20 janeaustenr_0.1.5  codetools_0.2-18   dichromat_2.0-0   
+[116] boot_1.3-28        MASS_7.3-54        gtools_3.9.2       assertthat_0.2.1   openssl_1.4.4     
+[121] rprojroot_2.0.2    withr_2.4.2        expm_0.999-6       parallel_4.1.0     hms_1.1.0         
+[126] grid_4.1.0         coda_0.19-4        class_7.3-19       rmarkdown_2.10     ggforce_0.3.3     
+[131] lubridate_1.7.10   base64enc_0.1-3   

@@ -1,0 +1,658 @@
+---
+title: "Sharpie vs Hurricane Dorian on Twitter"
+author: "Joseph Holler"
+date: "9/1/2021"
+output: html_document
+---
+
+# Sharpie vs Hurricane Dorian on Twitter
+Author: Joseph Holler
+Created: Fall 2019
+Updated: Fall 2021
+
+This analysis was developed with assistance from:
+- Casey Lilley's GEOG 323 final project available at: https://caseylilley.github.io/finalproj.html  
+- Leah Wasser and Carson Farmer's *Twitter Data in R Using RTweet* 
+tutorial on EarthLab at: 
+https://www.earthdatascience.org/courses/earth-analytics/get-data-using-apis/use-twitter-api-r/
+- Michael Minn's *Basic Spatial Point Pattern Analysis in R* tutorial at: http://michaelminn.net/tutorials/r-point-analysis/
+
+## Set up environment
+
+Load the R project saved in the root directory of this repository, so that the
+working directory is the root directory of the repository.
+
+```{r setup, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# list of required packages
+packages <- c(
+  "here", "svDialogs", "tidyverse",
+  "rtweet", "rehydratoR",
+  "tidytext", "tm", "igraph", "ggraph",
+  "tidycensus", "sf", "spdep"
+)
+
+# additional packages: test which are still needed:
+# "maps", "tm", "RColorBrewer", "rccmisc",
+
+
+# load and install required packages
+package_check <- lapply(
+  packages,
+  FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE, quietly = TRUE)
+      library(x, character.only = TRUE)
+    }
+  }
+)
+
+# save the R processing environment
+writeLines(
+  capture.output(sessionInfo()),
+  here("procedure", "environment", "r_environment.txt")
+)
+```
+
+## Set up Twitter Application
+
+You will need Twitter Developer API access to run this analysis:
+See https://cran.r-project.org/web/packages/rtweet/vignettes/auth.html for
+instructions.
+
+reference for search_tweets function: 
+https://rtweet.info/reference/search_tweets.html 
+- don't add any spaces in between variable name and value for your search  
+e.g. n=1000 is better than n = 1000
+- the first parameter in quotes is the search string
+- `n=10000` asks for 10,000 tweets
+- if you want more than 18,000 tweets, change `retryonratelimit` to `TRUE` and 
+wait 15 minutes for every batch of 18,000
+- `include_rts=FALSE` excludes retweets.
+- `token` refers to the twitter token you defined above for access to your twitter
+developer account
+- `geocode` is equal to a string with three parts: longitude, latitude, and 
+distance with the units mi for miles or km for kilometers
+
+This code block will ask you for your twitter application name, key, and secret.
+Then it will launch a web browser and prompt you to log in to Twitter to 
+authenticate the application.
+
+Never save your API keys in code where it can be committed and synced to GitHub!
+The code below is configured to save your keys in the environment, and this Git
+repository is set up to ignore the R environment data file.
+
+```{r twitter-setup, eval = FALSE}
+# Twitter application values
+twitter_vars <- list(
+  app = "enter Twitter application name",
+  key = "enter Twitter API key",
+  secret = "enter Twitter API secret key"
+)
+
+# if Twitter token has already been created, auto-fill dialogue with its values
+if (exists("twitter_token")) {
+  twitter_vars$app <- twitter_token$app$appname
+  twitter_vars$key <- twitter_token$app$key
+  twitter_vars$secret <- twitter_token$app$secret
+}
+
+twitter_token <- create_token(
+  app = dlgInput("Twitter App Name:", twitter_vars$app)$res,
+  consumer_key = dlgInput("Consumer Key:", twitter_vars$key)$res,
+  consumer_secret = dlgInput("Consumer Secret:", twitter_vars$secret)$res,
+  access_token = NULL,
+  access_secret = NULL
+)
+```
+
+# Pre-processing
+
+- Acquire Twitter data for analysis
+- Filter Twitter data for good geographic information and convert to Lat/Long
+coordinates
+
+## Search for Hurricane Dorian tweets
+
+get tweets for hurricane Dorian, searched on September 11, 2019
+**Warning**: this code will no longer result in the same data! 
+It is here for reference or replication work only.
+
+```{r search-dorian, eval = FALSE}
+dorian_raw <- search_tweets("dorian OR hurricane OR sharpiegate",
+  n = 200000, include_rts = FALSE,
+  token = twitter_token,
+  geocode = "32,-78,1000mi",
+  retryonratelimit = TRUE
+)
+
+# write status id's for results of the original twitter search
+write.table(dorian_raw$status_id,
+  here("data", "raw", "public", "dorianids.txt"),
+  append = FALSE, quote = FALSE, row.names = FALSE, col.names = FALSE
+)
+```
+
+## Search for generic tweets after hurricane season
+
+get tweets without any text filter for the same geographic region in November, 
+searched on November 19, 2019
+the query searches for all verified or unverified tweets, i.e. everything
+
+**Warning**: this code will no longer result in the same data! 
+It is here for reference or replication work only.
+
+```{r search-november, eval = FALSE}
+november_raw <- search_tweets("-filter:verified OR filter:verified",
+  n = 200000, include_rts = FALSE,
+  token = twitter_token,
+  geocode = "32,-78,1000mi",
+  retryonratelimit = TRUE
+)
+
+# write status id's for results of the original twitter search
+write.table(november_raw$status_id,
+  here("data", "raw", "public", "novemberids.txt"),
+  append = FALSE, quote = FALSE, row.names = FALSE, col.names = FALSE
+)
+```
+
+## Rehydrate the twitter data
+
+Twitter does not permit redistribution of Twitter data, with the exception of 
+tweet status ids. 
+For the purposes of transparency and reproducibility, 
+researchers may include a list of status id's with their publication. 
+The process of using those status ids to query Twitter for the full tweet data 
+is called **rehydrating**&mdash;like going back to the analogous fire hose of 
+big data.
+**Warning**: Twitter users and individual tweets can be deleted over time, 
+therefore the results of rehydration will be similar, but not identical to, the
+original Twitter data used for this research.  
+**Warning**: It may take more than an hour to rehydrate the raw tweets with 
+Twitter queries, therefore you may select to load only the derived status ids,
+which have filtered only the tweets with valid geographic data (approximately 
+one tenth of the raw tweets)
+
+### Load Twitter status ids
+
+```{r load-original-statusids, eval = FALSE}
+# load tweet status id's for Hurricane Dorian search results
+
+filtered <- dlgList(
+  choices = c("raw", "derived"), 
+  title = "Which Dorin ids?")$res
+
+dorianids <-
+  data.frame(read.table(here("data", filtered, "public", "dorianids.txt"),
+    numerals = "no.loss"
+  ))
+
+filtered <- dlgList(
+  choices = c("raw", "derived"), 
+  title = "Which Dorin ids?")$res
+
+# load cleaned status id's for November general twitter search
+novemberids <-
+  data.frame(read.table(here("data", "raw", "public", "novemberids.txt"),
+    numerals = "no.loss"
+  ))
+```
+
+### Rehydrate Twitter status ids
+This operation may take over an hour to run on all of the raw tweets
+
+```{r rehydrate, eval = FALSE}
+# rehydrate dorian tweets
+dorian_raw <- rehydratoR(twitter_token$app$key, twitter_token$app$secret,
+  twitter_token$credentials$oauth_token,
+  twitter_token$credentials$oauth_secret, dorianids,
+  base_path = NULL, group_start = 1
+)
+
+# rehydrate november tweets
+november_raw <- rehydratoR(twitter_token$app$key, twitter_token$app$secret,
+  twitter_token$credentials$oauth_token,
+  twitter_token$credentials$oauth_secret, novemberids,
+  base_path = NULL, group_start = 1
+)
+``` 
+
+## Load the original search results
+
+Students in the GEOG 323 Open Source GIScience course may download the original
+search results from the private course data repository: 
+https://github.com/GIS4DEV/geog323data/raw/main/dorian/dorian_raw.RDS
+https://github.com/GIS4DEV/geog323data/raw/main/dorian/november.RDS
+
+Save the two `.RDS` files to the `data/raw/private` folder and then load the
+data with the code block below.
+
+```{r load-original}
+dorian_raw <- readRDS(here("data", "raw", "private", "dorian_raw.RDS"))
+november_raw <- readRDS(here("data", "raw", "private", "november_raw.RDS"))
+```
+
+## Process geographic data in tweets 
+
+reference for lat_lng function: https://rtweet.info/reference/lat_lng.html
+adds a lat and long field to the data frame, picked out of the fields
+that you indicate in the c() list
+sample function: lat_lng(x, coords = c("coords_coords", "bbox_coords"))
+
+list and count unique place types
+NA results included based on profile locations, not geotagging / geocoding.
+If you have these, it indicates that you exhausted the more precise tweets 
+in your search parameters and are including locations based on user profiles
+
+```{r count-place-types}
+count(dorian_raw, place_type)
+```
+
+### Convert geographic information into lat/long coordinates
+
+If you have loaded filtered status ids, or you have already run this code, you
+will not notice a difference in `place_type` or `n` because the data has already
+been processed.
+
+```{r lat-long}
+# convert GPS coordinates into lat and lng columns
+# do not use geo_coords! Lat/Lng will be inverted
+dorian <- lat_lng(dorian_raw, coords = c("coords_coords"))
+november <- lat_lng(november_raw, coords = c("coords_coords"))
+
+# select any tweets with lat and lng columns (from GPS) or
+# designated place types of your choosing
+dorian <- subset(
+  dorian,
+  place_type == "city" | place_type == "neighborhood" |
+    place_type == "poi" | !is.na(lat)
+)
+
+november <- subset(
+  november,
+  place_type == "city" | place_type == "neighborhood" |
+    place_type == "poi" | !is.na(lat)
+)
+
+# convert bounding boxes into centroids for lat and lng columns
+dorian <- lat_lng(dorian, coords = c("bbox_coords"))
+november <- lat_lng(november, coords = c("bbox_coords"))
+
+# re-check counts of place types
+count(dorian, place_type)
+```
+
+### Save processed tweets
+
+Optionally,
+Save the tweet id's to the `data\derived\public` folder as plain text.  
+Save the full tweet data to `data\derived\private` folder as RDS files.  
+Full Tweet data cannot be shared with the public, therefore it is stored in
+a folder ignored by Git.
+
+```{r save-processed-tweets}
+write.table(november$status_id,
+  here("data", "derived", "public", "novemberids.txt"),
+  append = FALSE, quote = FALSE, row.names = FALSE, col.names = FALSE
+)
+
+write.table(dorian$status_id,
+  here("data", "derived", "public", "dorianids.txt"),
+  append = FALSE, quote = FALSE, row.names = FALSE, col.names = FALSE
+)
+
+saveRDS(dorian, here("data", "derived", "private", "dorian.RDS"))
+saveRDS(november, here("data", "derived", "private", "november.RDS"))
+```
+
+### Load processed tweets
+
+Optionally,
+Load processed twitter data
+
+```{r load-processed-tweets, eval = FALSE }
+dorian <- readRDS(here("data", "derived", "private", "dorian.RDS"))
+november <- readRDS(here("data", "derived", "private", "november.RDS"))
+```
+
+# Temporal Analysis
+
+Create a temporal data frame and graph it
+
+```{r temporal}
+dorian_tweets_by_hour <- ts_data(dorian, by = "hours")
+ts_plot(dorian, by = "hours")
+```
+
+# Network Analysis
+
+Create a network data frame. 
+Other options for 'edges' in the network include mention, retweet, and reply
+The graph does not look good (understatement), because of poor data regarding quotes.
+It would be more interesting to visualize retweets, but we did not search for
+them, as we were focusing on original content.
+
+```{r network}
+dorian_network <- network_graph(dorian, c("quote"))
+plot.igraph(dorian_network)
+```
+
+# Text Analysis
+
+## Clean the text data
+
+Parse the tweet data for plain language, and parse tweet text into words.
+Remove stop words and our search terms.
+
+```{r text-processing}
+# remove urls, fancy formatting, etc. in other words, clean the text content
+dorian_text <- dorian %>%
+  select(text) %>%
+  plain_tweets()
+
+# parse out words from tweet text
+dorian_words <- dorian_text %>% unnest_tokens(word, text)
+
+# how many words do you have including the stop words?
+word_count <- list(before = count(dorian_words)$n)
+
+# create list of stop words (useless words not worth analyzing)
+data("stop_words")
+
+# add "t.co" twitter links to the list of stop words
+# also add the twitter search terms to the list
+stop_words <- stop_words %>%
+  add_row(word = "t.co", lexicon = "SMART") %>%
+  add_row(word = "hurricane", lexicon = "Search") %>%
+  add_row(word = "dorian", lexicon = "Search") %>%
+  add_row(word = "sharpiegate", lexicon = "Search")
+
+# delete stop words from dorianWords with an anti_join
+dorian_words <- anti_join(dorian_words, stop_words, by="word")
+
+# how many words after removing the stop words?
+word_count <- append(
+  word_count,
+  list(after = count(dorian_words)$n)
+  )
+print(word_count)
+```
+
+## Graph frequencies of words
+
+```{r word-frequency}
+dorian_words %>%
+  count(word, sort = TRUE) %>%
+  top_n(15) %>%  #deprecated; try replacing with slice_min() or slice_max()
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col() +
+  xlab(NULL) +
+  coord_flip() +
+  labs(
+    x = "Count",
+    y = "Unique words",
+    title = "Count of unique words found in tweets"
+  )
+```
+
+## Analyze and graph word assoctiation
+
+```{r word-association}
+# separate words and count frequency of word pair occurrence in tweets
+dorian_word_pairs <- dorian_text %>%
+  mutate(text = removeWords(tolower(text), stop_words$word)) %>%
+  unnest_tokens(paired_words, text, token = "ngrams", n = 2) %>%
+  separate(paired_words, c("word1", "word2"), sep = " ") %>%
+  count(word1, word2, sort = TRUE)
+
+# graph a word cloud with space indicating association.
+# you may change the filter to filter more or less than pairs with 25 instances
+dorian_word_pairs %>%
+  filter(n >= 25 & !is.na(word1) & !is.na(word2)) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
+  geom_node_point(color = "darkslategray4", size = 3) +
+  geom_node_text(aes(label = name), vjust = 1.8, size = 3) +
+  labs(
+    title = "Word Network of Tweets during Hurricane Dorian",
+    x = "", y = ""
+  ) +
+  theme(
+    plot.background = element_rect(
+    fill = "grey95",
+    colour = "black",
+    size = 1
+    ),
+    legend.background = element_rect(fill = "grey95")
+  )
+```
+
+## Spatial Analysis
+
+First, you will need a Census API. You can sign up for one here: https://api.census.gov/data/key_signup.html
+
+```{r census-api}
+census_api_key(dlgInput(
+  "Enter a Census API Key",
+  Sys.getenv("CENSUS_API_KEY")
+)$res,
+overwrite = TRUE
+)
+
+counties <- get_estimates(
+  "county",
+  product = "population",
+  output = "wide",
+  geometry = TRUE,
+  keep_geo_vars = TRUE
+)
+```
+
+## Select and save counties of interest
+
+select only the states you want, with FIPS state codes
+look up fips codes here: 
+https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code 
+
+```{r save-counties}
+counties <- filter(
+  counties,
+  STATEFP %in% c(
+    "54", "51", "50", "47", "45", "44", "42", "39", "37", "36", "05", "01",
+    "34", "33", "29", "28", "25", "24", "23", "22", "21", "18", "17", "13",
+    "12", "11", "10", "09"
+  )
+)
+# alternatively, one could select by location using original search criteria...
+
+saveRDS(counties, here("data", "derived", "public", "counties.RDS"))
+```
+
+### Load counties
+
+Optionally, load counties from the `counties.RDS` file saved with the repository
+
+```{r load-counties}
+counties <- readRDS(here("data", "derived", "public", "counties.RDS"))
+```
+
+## Map Population Density and Tweet Points
+
+map results with GGPlot
+note: cut_interval is an equal interval classification function, while 
+cut_number is a quantile / equal count function
+you can change the colors, titles, and transparency of points
+
+```{r map-tweet-points}
+ggplot() +
+  geom_sf(data = counties, 
+    aes(fill = cut_number(DENSITY, 5)), color = "grey") +
+  scale_fill_brewer(palette = "GnBu") +
+  guides(fill = guide_legend(title = "Population Density")) +
+  geom_point(
+    data = dorian, aes(x = lng, y = lat),
+    colour = "purple", alpha = 0.1, size = 1
+  ) +
+  labs(title = "Tweet Locations During Hurricane Dorian") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  ) +
+  xlim(-96, -67) +
+  ylim(24, 47)
+```
+
+## Join Tweets to Counties
+
+Spatially join Dorian and November tweets to counties and save counties
+as `counties_tweet_counts.RDS`
+
+```{r join-tweets-to-counties}
+dorian_sf <- dorian %>%
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>% # make point geometries
+  st_transform(4269) %>% # transform to NAD 1983
+  st_join(select(counties, GEOID)) # spatially join counties to each tweet
+
+dorian_by_county <- dorian_sf %>%
+  st_drop_geometry() %>% # drop geometry / make simple table
+  group_by(GEOID) %>% # group by county using GEOID
+  summarise(dorian = n()) # count # of tweets
+
+counties <- counties %>%
+  left_join(dorian_by_county, by = "GEOID") %>% # join count of tweets to counties
+  mutate(dorian = replace_na(dorian, 0)) # replace nulls with 0's
+
+rm(dorian_by_county)
+
+# Repeat the workflow above for tweets in November
+
+nov_by_county <- november %>%
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>%
+  st_transform(4269) %>%
+  st_join(select(counties, GEOID)) %>%
+  st_drop_geometry() %>%
+  group_by(GEOID) %>%
+  summarise(nov = n())
+
+counties <- counties %>%
+  left_join(nov_by_county, by = "GEOID") %>%
+  mutate(nov = replace_na(nov, 0))
+
+counties <- counties %>%
+  mutate(dorrate = dorian / POP * 10000) %>% # dorrate is tweets per 10,000
+  mutate(ntdi = (dorian - nov) / (dorian + nov)) %>% # normalized tweet diff
+  mutate(ntdi = replace_na(ntdi, 0)) # replace NULLs with 0's
+
+rm(nov_by_county)
+
+# save counties geographic data with derived tweet rates
+saveRDS(counties, here("data", "derived", "public", "counties_tweet_counts.RDS"))
+```
+
+Optionally, begin here by loading counties with Twitter data
+
+```{r load-counties-with-twitter}
+counties <- readRDS(here("data", "derived", "public", "counties_tweet_counts.RDS"))
+```
+
+## Spatial Cluster Analysis
+
+### Create Spatial Weight Matrix
+
+Use 110km Euclidean distance and include self in the weight matrix
+
+```{r spatial-weight-matrix, warning = FALSE}
+county_coords <- counties %>%
+  st_centroid() %>% # convert polygons to centroid points
+  st_coordinates() # convert to simple x,y coordinates to play with stdep
+
+thresdist <- county_coords %>% 
+  dnearneigh(0, 110, longlat = TRUE) %>% # use geodesic distance of 110km
+  # distance should be long enough for every feature to have >= one neighbor
+  include.self() # include a county in its own neighborhood (for G*)
+
+thresdist # view statistical summary of the nearest neighbors
+```
+
+Optionally, plot the spatial weight matrix results
+This should result in a very dense graph, because each county is connected
+to all other counties within 110 km.
+
+```{r plot-spatial-weight-matrix}
+plot(thresdist, county_coords, lwd=0.1) # plot nearest neighbor ties
+```
+
+## Calculate Getis-Ord G* Statistic
+
+```{r getis-ord}
+
+# Create weight matrix from the neighbor objects
+dwm <- nb2listw(thresdist, zero.policy = T)
+
+######## Local G* Hotspot Analysis ########
+# Get Ord G* statistic for hot and cold spots
+counties$locG <- as.vector(localG(counties$dorrate,
+  listw = dwm,
+  zero.policy = TRUE
+))
+
+# may be same as:
+# counties$dorrate %>% localG(listw = dwm, zero.policy = TRUE) %>% as.vector()
+
+# check summary statistics of the local G score
+summary(counties$locG)
+```
+
+## Map Hotpots
+
+classify G scores by significance values typical of Z-scores
+where 1.15 is at the 0.125 confidence level,
+and 1.95 is at the 0.05 confidence level for two tailed z-scores
+based on Getis and Ord (1995) Doi: 10.1111/j.1538-4632.1992.tb00261.x
+to find other critical values, use the qnorm() function as shown here:
+https://methodenlehre.github.io/SGSCLM-R-course/statistical-distributions.html
+Getis Ord also suggest applying a Bonferroni correction 
+
+breaks and colors from http://michaelminn.net/tutorials/r-point-analysis/
+based on 1.96 as the 95% confidence interval for z-scores
+if your results don't have values in each of the 5 categories, you may need
+to change the values & labels accordingly.
+
+Can we figure out a way to include the neighborhood surrounding each significant
+cluster?
+
+```{r map-hotspots}
+# classify by significance levels
+siglevel <- c(1.15, 1.95)
+counties <- counties %>%
+  mutate(sig = cut(locG, c(
+    min(counties$locG),
+    siglevel[2] * -1,
+    siglevel[1] * -1,
+    siglevel[1],
+    siglevel[2],
+    max(counties$locG)
+  )))
+rm(siglevel)
+
+# map results!
+ggplot() +
+  geom_sf(data = counties, aes(fill = sig), color = "white", lwd = 0.1) +
+  scale_fill_manual(
+    values = c("#0000FF80", "#8080FF80", "#FFFFFF80", "#FF808080", "#FF000080"),
+    labels = c("low", "", "insignificant", "", "high"),
+    aesthetics = "fill"
+  ) +
+  guides(fill = guide_legend(title = "Hot Spots")) +
+  labs(title = "Clusters of Hurricane Dorian Twitter Activity") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  )
+```
