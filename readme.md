@@ -1,4 +1,4 @@
-# RE-Dorian
+# OR-Dorian
 
 This compendium is for a research project in progress, with the aim of contrasting information from fake Twitter storms with real hurricanes, using the case of Hurricane Dorian in the United States.
 
