@@ -36,7 +36,6 @@ packages <- c(
 # additional packages: test which are still needed:
 # "maps", "tm", "RColorBrewer", "rccmisc",
 
-
 # load and install required packages
 package_check <- lapply(
   packages,
@@ -545,8 +544,8 @@ counties <- counties %>%
 
 counties <- counties %>%
   mutate(dorrate = dorian / POP * 10000) %>% # dorrate is tweets per 10,000
-  mutate(ntdi = (dorian - nov) / (dorian + nov)) %>% # normalized tweet diff
-  mutate(ntdi = replace_na(ntdi, 0)) # replace NULLs with 0's
+  mutate(ndti = (dorian - nov) / (dorian + nov)) %>% # normalized diff tweet index
+  mutate(ndti = replace_na(ndti, 0)) # replace NULLs with 0's
 
 rm(nov_by_county)
 
@@ -558,6 +557,22 @@ Optionally, begin here by loading counties with Twitter data
 
 ```{r load-counties-with-twitter}
 counties <- readRDS(here("data", "derived", "public", "counties_tweet_counts.RDS"))
+```
+
+```{r map ndti}
+ggplot() +
+  geom_sf(data = counties, 
+    aes(fill = cut_interval(dorrate, 5)), color = "grey", lwd=0.01) +
+  scale_fill_brewer(palette = "GnBu") +
+  guides(fill = guide_legend(title = "Normalized Difference Tweet Index")) +
+  labs(title = "Hurricane Dorian Twitter Activity") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  ) +
+  xlim(-96, -67) +
+  ylim(24, 47)
 ```
 
 ## Spatial Cluster Analysis
@@ -584,7 +599,7 @@ This should result in a very dense graph, because each county is connected
 to all other counties within 110 km.
 
 ```{r plot-spatial-weight-matrix}
-plot(thresdist, county_coords, lwd=0.1) # plot nearest neighbor ties
+plot(thresdist, county_coords, lwd=0.01) # plot nearest neighbor ties
 ```
 
 ## Calculate Getis-Ord G* Statistic
