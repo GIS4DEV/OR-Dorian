@@ -176,23 +176,26 @@ one tenth of the raw tweets)
 
 ### Load Twitter status ids
 
+You have a choice of loading all of the status IDs from the original search, or a list of status IDs filtered to contain only those with precise enough geographic data. Loading the original search will be a more exact replication while loading filtered data will speed up processing without changing the final result. Neither process will result in identical findings compared to the original study because Tweets can be deleted after posting.
+
 ```{r load-original-statusids, eval = FALSE}
 # load tweet status id's for Hurricane Dorian search results
 
 filtered <- dlgList(
   choices = c("raw", "derived"), 
-  title = "Which Dorin ids?")$res
+  title = "Which Dorian ids?")$res
 
 dorianids <-
   data.frame(read.table(here("data", filtered, "public", "dorianids.txt"),
     numerals = "no.loss"
   ))
 
+# load cleaned status id's for November general twitter search
 filtered <- dlgList(
   choices = c("raw", "derived"), 
-  title = "Which Dorin ids?")$res
+  title = "Which November ids?")$res
 
-# load cleaned status id's for November general twitter search
+
 novemberids <-
   data.frame(read.table(here("data", "raw", "public", "novemberids.txt"),
     numerals = "no.loss"
